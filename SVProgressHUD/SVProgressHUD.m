@@ -733,7 +733,9 @@ static const CGFloat SVProgressHUDLabelSpacing = 8.0f;
 - (void)moveToPoint:(CGPoint)newCenter rotateAngle:(CGFloat)angle {
     self.hudView.transform = CGAffineTransformMakeRotation(angle);
     if (self.containerView) {
-        self.hudView.center = CGPointMake(self.containerView.center.x + self.offsetFromCenter.horizontal, self.containerView.center.y + self.offsetFromCenter.vertical);
+        CGFloat centerX = self.containerView.bounds.size.width / 2.0;
+        CGFloat centerY = self.containerView.bounds.size.height / 2.0;
+        self.hudView.center = CGPointMake(centerX + self.offsetFromCenter.horizontal, centerY + self.offsetFromCenter.vertical);
     } else {
         self.hudView.center = CGPointMake(newCenter.x + self.offsetFromCenter.horizontal, newCenter.y + self.offsetFromCenter.vertical);
     }
