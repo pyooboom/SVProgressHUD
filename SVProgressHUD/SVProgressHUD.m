@@ -43,6 +43,7 @@ static const CGFloat SVProgressHUDLabelSpacing = 8.0f;
 @property (nonatomic, strong) UIBlurEffect *hudViewCustomBlurEffect;
 @property (nonatomic, strong) UILabel *statusLabel;
 @property (nonatomic, strong) UIImageView *imageView;
+@property (nonatomic, assign) BOOL onlyText;
 
 @property (nonatomic, strong) UIView *indefiniteAnimatedView;
 @property (nonatomic, strong) SVProgressAnimatedView *ringView;
@@ -453,7 +454,7 @@ static const CGFloat SVProgressHUDLabelSpacing = 8.0f;
 - (void)updateHUDFrame {
     // Check if an image or progress ring is displayed
     BOOL imageUsed = (self.imageView.image) && !(self.imageView.hidden);
-    BOOL progressUsed = self.imageView.hidden;
+    BOOL progressUsed = self.imageView.hidden && !self.onlyText;
     
     // Calculate size of string
     CGRect labelRect = CGRectZero;
@@ -763,6 +764,7 @@ static const CGFloat SVProgressHUDLabelSpacing = 8.0f;
 #pragma mark - Master show/dismiss methods
 
 - (void)showProgress:(float)progress status:(NSString*)status {
+    self.onlyText = NO;
     __weak SVProgressHUD *weakSelf = self;
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         __strong SVProgressHUD *strongSelf = weakSelf;
@@ -860,15 +862,21 @@ static const CGFloat SVProgressHUDLabelSpacing = 8.0f;
             [strongSelf cancelIndefiniteAnimatedViewAnimation];
             
             // Update imageView
-            if (self.shouldTintImages) {
-                if (image.renderingMode != UIImageRenderingModeAlwaysTemplate) {
-                    strongSelf.imageView.image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+            if (image) {
+                if (self.shouldTintImages) {
+                    if (image.renderingMode != UIImageRenderingModeAlwaysTemplate) {
+                        strongSelf.imageView.image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+                    }
+                    strongSelf.imageView.tintColor = strongSelf.foregroundImageColorForStyle;
+                } else {
+                    strongSelf.imageView.image = image;
                 }
-                strongSelf.imageView.tintColor = strongSelf.foregroundImageColorForStyle;
+                strongSelf.imageView.hidden = NO;
+                strongSelf.onlyText = NO;
             } else {
-                strongSelf.imageView.image = image;
+                strongSelf.imageView.hidden = YES;
+                strongSelf.onlyText = YES;
             }
-            strongSelf.imageView.hidden = NO;
             
             // Update text
             strongSelf.statusLabel.hidden = status.length == 0;
